@@ -1,36 +1,19 @@
-/**
- * Loads an image into canvas.
- * 
- */
-function loadImage(src) {
-  alert('Hello')
-  const img = new Image();
-  img.crossOrigin = '';
-  const canvas = document.querySelector('canvas');
-  const ctx = canvas.getContext('2d');
-
-  // Load the image on canvas
-  img.addEventListener('load', () => {
-    // Set canvas width, height same as image
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-
-    removebackground();
-  });
-
-  img.src = src;
-}
-
-
-/**
- * Remove background an image
- */
 export async function removebackground() {
-  const canvas = document.querySelector('canvas');
-  const ctx = canvas.getContext('2d');
+  const originalCanvas = document.querySelector('canvas');
+  const originalCtx = originalCanvas.getContext('2d');
 
-  // * Cargar modelo
+  // Crear un nuevo canvas
+  const newCanvas = document.createElement('canvas');
+  const newCtx = newCanvas.getContext('2d');
+
+  // Establecer el tamaño del nuevo canvas igual al del canvas original
+  newCanvas.width = originalCanvas.width;
+  newCanvas.height = originalCanvas.height;
+
+  // Agregar el nuevo canvas al DOM (por ejemplo, después del canvas original)
+  originalCanvas.parentNode.appendChild(newCanvas);
+
+  // Cargar modelo
   const net = await bodyPix.load({
     architecture: 'MobileNetV1',
     outputStride: 16,
@@ -38,22 +21,21 @@ export async function removebackground() {
     quantBytes: 2
   });
 
-  // * Segmentacion
-  const { data: map } = await net.segmentPerson(canvas, {
+  // Segmentación
+  const { data: map } = await net.segmentPerson(originalCanvas, {
     internalResolution: 'medium',
   });
 
+  // Extraer data de la imagen
+  const imgData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
 
-  // * Extracting image data
-  const { data: imgData } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-  // Creating new image data
-  const newImg = ctx.createImageData(canvas.width, canvas.height);
+  // Crear nueva image data para el nuevo canvas
+  const newImg = newCtx.createImageData(newCanvas.width, newCanvas.height);
   const newImgData = newImg.data;
 
   for (let i = 0; i < map.length; i++) {
-    //The data array stores four values for each pixel
-    const [r, g, b, a] = [imgData[i * 4], imgData[i * 4 + 1], imgData[i * 4 + 2], imgData[i * 4 + 3]];
+    // The data array stores four values for each pixel
+    const [r, g, b, a] = [imgData.data[i * 4], imgData.data[i * 4 + 1], imgData.data[i * 4 + 2], imgData.data[i * 4 + 3]];
     [
       newImgData[i * 4],
       newImgData[i * 4 + 1],
@@ -62,10 +44,6 @@ export async function removebackground() {
     ] = !map[i] ? [255, 255, 255, 0] : [r, g, b, a];
   }
 
-
-  // Draw the new image back to canvas
-  ctx.putImageData(newImg, 0, 0);
-
+  // Dibujar la nueva imagen en el nuevo canvas
+  newCtx.putImageData(newImg, 0, 0);
 }
-
-loadImage('man.jpg');

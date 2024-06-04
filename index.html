@@ -18,19 +18,20 @@
     </div>
 
     <!-- ** IMAGEN  -->
-    <div class="flex justify-center items-center">
-      <canvas id="canvas" class="border-4 border-white rounded-md hidden"></canvas>
+    <div class="flex justify-center items-center overflow-auto">
+      <canvas id="canvas"></canvas>
     </div>
 
     <!-- ** BOTONES  -->
     <div class="flex space-x-4 justify-center py-5">
-      <button
+      <button id="deleteBackground"
         class="p-1 rounded-md border-2 bg-green-500 text-white hover:scale-105 transition-all duration-400 hover:bg-green-700">Eliminar
         el fondo</button>
-      <button
+      <button id="deleteBody"
         class="p-1 rounded-md border-2 bg-green-500 text-white hover:scale-105 transition-all duration-400 hover:bg-green-700">Eliminar
         el cuerpo y dejar el fondo</button>
       <button
+      id="blurBackground"
         class="p-1 rounded-md border-2 bg-green-500 text-white hover:scale-105 transition-all duration-400 hover:bg-green-700">Difuminar
         el fondo</button>
     </div>
